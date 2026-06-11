@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SysReview Static | Sistematik Alan Taraması</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">GitHub Pages uyumlu statik sürüm</p>
+      <h1>SysReview Static</h1>
+      <p class="subtitle">PDF tabanlı sistematik alan taraması, dahil/hariç kodlama, araştırma sorularına göre veri çıkarımı, alıntılar, tablolar ve grafikler.</p>
+    </div>
+    <div class="status-card">
+      <span id="modeBadge" class="badge include">Statik mod</span>
+      <small>Sunucu, npm, veritabanı ve API anahtarı gerektirmez. PDF metinleri tarayıcı içinde işlenir.</small>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <button class="nav active" data-step="upload">1. PDF Yükle</button>
+      <button class="nav" data-step="criteria">2. Kriterler</button>
+      <button class="nav" data-step="questions">3. Araştırma Soruları</button>
+      <button class="nav" data-step="screening">4. Dahil/Hariç Tarama</button>
+      <button class="nav" data-step="analysis">5. Analiz ve Grafikler</button>
+      <button class="nav" data-step="report">6. Rapor</button>
+    </aside>
+
+    <section class="content">
+      <section id="upload" class="panel step active">
+        <div class="panel-head">
+          <div>
+            <h2>1. PDF dokümanlarını yükle</h2>
+            <p>Birden fazla PDF seçebilirsiniz. Dosyalar sunucuya gönderilmez; metin çıkarma işlemi doğrudan tarayıcıda yapılır.</p>
+          </div>
+          <div class="inline-actions">
+            <button id="saveProject" class="secondary">Proje JSON indir</button>
+            <label class="secondary file-button" for="projectInput">Proje JSON yükle</label>
+            <input id="projectInput" type="file" accept="application/json" hidden />
+          </div>
+        </div>
+
+        <label class="dropzone" for="pdfInput">
+          <input id="pdfInput" type="file" accept="application/pdf" multiple hidden />
+          <span class="drop-icon">📄</span>
+          <strong>PDF dosyalarını seç</strong>
+          <small>veya buraya sürükle-bırak</small>
+        </label>
+
+        <div class="actions">
+          <button id="clearDocs" class="secondary">Listeyi temizle</button>
+          <button id="goCriteria" class="primary">Kriterlere geç</button>
+        </div>
+
+        <div id="docList" class="cards"></div>
+      </section>
+
+      <section id="criteria" class="panel step">
+        <div class="panel-head">
+          <div>
+            <h2>2. Dahil etme ve hariç tutma kriterleri</h2>
+            <p>Sistem yüklenen PDF metinlerinden otomatik kriter önerisi, örnek netleştirme soruları ve olası kapsam notları üretir.</p>
+          </div>
+          <button id="suggestCriteria" class="primary">PDF'lere göre kriter öner</button>
+        </div>
+
+        <div id="criteriaSuggestions" class="suggestion-box muted-box">Henüz öneri oluşturulmadı.</div>
+
+        <div class="grid two">
+          <label class="field">
+            <span>Dahil etme kriterleri</span>
+            <textarea id="inclusionCriteria" rows="10">Araştırma konusu ile doğrudan ilişkili olmalıdır.
+Hakemli makale, konferans bildirisi, tez veya akademik rapor olmalıdır.
+Tam metin erişilebilir olmalıdır.
+Yöntem, bulgu veya tartışma bölümleri araştırma sorularına veri sağlamalıdır.</textarea>
+          </label>
+          <label class="field">
+            <span>Hariç tutma kriterleri</span>
+            <textarea id="exclusionCriteria" rows="10">Tam metni bulunmayan çalışmalar hariç tutulacaktır.
+Araştırma konusu ile ilgisiz çalışmalar hariç tutulacaktır.
+Editöryal, blog, haber, duyuru ve akademik veri içermeyen metinler hariç tutulacaktır.
+Tekrarlayan kayıtlar veya aynı çalışmanın önceki sürümleri hariç tutulacaktır.</textarea>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button data-step-target="upload" class="secondary goto">Geri</button>
+          <button data-step-target="questions" class="primary goto">Araştırma sorularına geç</button>
+        </div>
+      </section>
+
+      <section id="questions" class="panel step">
+        <h2>3. Araştırma sorularını gir</h2>
+        <p>Her satıra bir araştırma sorusu yazın. Analiz tabloları, alıntılar ve sentez raporu bu sorulara göre üretilecektir.</p>
+        <label class="field">
+          <span>Araştırma soruları</span>
+          <textarea id="researchQuestions" rows="9">Çalışmalar hangi araştırma desenleriyle yürütülmüştür?
+Çalışmalarda hangi katılımcı grupları ve bağlamlar ele alınmıştır?
+Çalışmaların temel bulguları ve öne çıkan temaları nelerdir?
+Çalışmalarda raporlanan sınırlılıklar nelerdir?</textarea>
+        </label>
+        <div class="actions">
+          <button data-step-target="criteria" class="secondary goto">Geri</button>
+          <button data-step-target="screening" class="primary goto">Taramaya geç</button>
+        </div>
+      </section>
+
+      <section id="screening" class="panel step">
+        <div class="panel-head">
+          <div>
+            <h2>4. Dahil/Hariç tarama</h2>
+            <p>Her PDF, kriterlere göre otomatik olarak “Dahil”, “Hariç” veya “Belirsiz” şeklinde kodlanır. Kararlar elle değiştirilebilir.</p>
+          </div>
+          <button id="runScreening" class="primary">Taramayı başlat</button>
+        </div>
+        <div id="screeningProgress" class="progress hidden"><div></div></div>
+        <div class="table-wrap">
+          <table id="screeningTable">
+            <thead>
+              <tr>
+                <th>Dosya</th><th>Başlık</th><th>Yıl</th><th>Karar</th><th>Güven</th><th>Gerekçe</th><th>Manuel?</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="actions">
+          <button id="exportScreeningCsv" class="secondary">Tarama CSV indir</button>
+          <button data-step-target="analysis" class="primary goto">Analize geç</button>
+        </div>
+      </section>
+
+      <section id="analysis" class="panel step">
+        <div class="panel-head">
+          <div>
+            <h2>5. Veri çıkarımı, alıntılar ve grafikler</h2>
+            <p>Yalnızca “Dahil” ve istenirse “Belirsiz” belgeleri araştırma sorularına göre analiz edilir.</p>
+          </div>
+          <div class="inline-actions">
+            <label class="check"><input type="checkbox" id="includeUnclear" checked /> Belirsizleri de analiz et</label>
+            <button id="runAnalysis" class="primary">Analizi başlat</button>
+          </div>
+        </div>
+        <div id="analysisProgress" class="progress hidden"><div></div></div>
+
+        <div class="chart-grid">
+          <div class="chart-card"><canvas id="decisionChart"></canvas></div>
+          <div class="chart-card"><canvas id="yearChart"></canvas></div>
+          <div class="chart-card"><canvas id="themeChart"></canvas></div>
+        </div>
+
+        <h3>Veri çıkarım tablosu</h3>
+        <div class="table-wrap">
+          <table id="extractionTable">
+            <thead>
+              <tr><th>Çalışma</th><th>Yıl</th><th>Desen</th><th>Örneklem</th><th>Bağlam</th><th>Odak/Değişkenler</th><th>Temalar</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <h3>Araştırma sorularına göre cevaplar</h3>
+        <div id="rqAnswerList" class="rq-list"></div>
+
+        <h3>Metin alıntıları</h3>
+        <div id="quoteList" class="quote-list"></div>
+
+        <div class="actions">
+          <button id="exportExtractionCsv" class="secondary">Veri tablosu CSV indir</button>
+          <button id="exportJson" class="secondary">Tüm sonuçları JSON indir</button>
+          <button data-step-target="report" class="primary goto">Rapor oluştur</button>
+        </div>
+      </section>
+
+      <section id="report" class="panel step">
+        <div class="panel-head">
+          <div>
+            <h2>6. Sentez raporu</h2>
+            <p>Çalışma sonuçlarını araştırma sorularına göre kısa bir HTML rapora dönüştürür.</p>
+          </div>
+          <button id="runSynthesis" class="primary">Sentez oluştur</button>
+        </div>
+        <article id="reportOutput" class="report muted-box">Henüz rapor oluşturulmadı.</article>
+        <div class="actions">
+          <button id="downloadHtmlReport" class="secondary">HTML rapor indir</button>
+          <button onclick="window.print()" class="secondary">Yazdır / PDF kaydet</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <template id="docCardTemplate">
+    <div class="doc-card">
+      <div>
+        <strong class="doc-title"></strong>
+        <p class="doc-meta"></p>
+      </div>
+      <span class="badge soft doc-status">Hazır</span>
+    </div>
+  </template>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="assets/app.js" type="module"></script>
+</body>
+</html>
